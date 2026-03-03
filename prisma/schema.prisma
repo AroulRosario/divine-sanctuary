@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Multilingual Bible Models
+model Language {
+  id                String             @id @default(cuid())
+  code              String             @unique // e.g., 'en', 'hi', 'ta', 'te'
+  name              String
+  translations      VerseTranslation[]
+  dailyGospels      DailyGospel[]
+}
+
+model Book {
+  id           String    @id @default(cuid())
+  order        Int
+  name         String
+  abbreviation String
+  chapters     Chapter[]
+}
+
+model Chapter {
+  id      String   @id @default(cuid())
+  number  Int
+  book    Book     @relation(fields: [bookId], references: [id])
+  bookId  String
+  verses  Verse[]
+}
+
+model Verse {
+  id           String             @id @default(cuid())
+  number       Int
+  chapter      Chapter            @relation(fields: [chapterId], references: [id])
+  chapterId    String
+  translations VerseTranslation[]
+  dailyGospels DailyGospel[]
+}
+
+model VerseTranslation {
+  id         String   @id @default(cuid())
+  text       String   @db.Text
+  verse      Verse    @relation(fields: [verseId], references: [id])
+  verseId    String
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String
+
+  @@unique([verseId, languageId])
+}
+
+// Content Engine Models
+model DailyGospel {
+  id         String   @id @default(cuid())
+  date       DateTime @unique
+  meaning    String   @db.Text
+  verse      Verse    @relation(fields: [verseId], references: [id])
+  verseId    String
+  language   Language @relation(fields: [languageId], references: [id])
+  languageId String
+}
+
+model Sermon {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  videoUrl    String
+  thumbnail   String?
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+}
+
+// E-Commerce Models
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("INR")
+  category    String
+  stock       Int      @default(0)
+  imageUrl    String?
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  customerEmail   String
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  currency        String
+  status          String      @default("PENDING") // PENDING, PAID, SHIPPED, COMPLETED
+  paymentId       String?     // Stripe/Razorpay payment ID
+  paymentProvider String?     // 'STRIPE' or 'RAZORPAY'
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+}
+
+// Engagement Models
+model PrayerRequest {
+  id        String   @id @default(cuid())
+  name      String?
+  request   String   @db.Text
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

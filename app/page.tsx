@@ -1,65 +1,89 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="relative min-h-screen overflow-hidden font-sans selection:bg-gold-soft selection:text-crimson-deep">
+      {/* Hero Section with Cinematic Background */}
+      <div className="relative h-screen w-full">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/assets/biblical_landscape_cinematic_1772525803435.png"
+          alt="Divine Sanctuary Hero"
+          fill
+          className="object-cover brightness-50"
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-parchment/10 to-parchment" />
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+          <h1 className="text-6xl md:text-8xl font-serif text-gold-soft mb-6 drop-shadow-2xl animate-fade-in">
+            The Divine Sanctuary
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl md:text-2xl text-parchment/90 max-w-2xl font-light italic mb-10">
+            "Thy word is a lamp unto my feet, and a light unto my path."
           </p>
+          <div className="flex gap-6">
+            <Link href="/" className="glass px-8 py-4 text-lg font-medium text-crimson-deep transition-all holy-glow rounded-full">
+              Explore Scripture
+            </Link>
+            <Link href="/" className="bg-crimson-deep text-parchment px-8 py-4 text-lg font-medium transition-all hover:bg-opacity-90 rounded-full shadow-lg">
+              Sanctuary Store
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* Features Grid */}
+      <section className="relative py-24 px-6 md:px-24 bg-parchment text-crimson-deep">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="glass p-8 rounded-3xl transition-all holy-glow flex flex-col items-center text-center">
+            <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden shadow-inner">
+              <Image
+                src="/assets/rosary_cathedral_light_1772525530668.png"
+                alt="Multilingual Bible"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <h3 className="text-2xl font-serif mb-4">Multilingual Bible</h3>
+            <p className="opacity-80">Read the Word in your heart language. Supporting 7 Indic languages alongside English.</p>
+          </div>
+
+          <div className="glass p-8 rounded-3xl transition-all holy-glow flex flex-col items-center text-center">
+            <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden shadow-inner">
+              <Image
+                src="/assets/stained_glass_reflections_1772525788785.png"
+                alt="Daily Gospel"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <h3 className="text-2xl font-serif mb-4">Daily Bread</h3>
+            <p className="opacity-80">Fresh insights and spiritual nourishment delivered to your soul every midnight.</p>
+          </div>
+
+          <div className="glass p-8 rounded-3xl transition-all holy-glow flex flex-col items-center text-center">
+            <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden shadow-inner">
+              <Image
+                src="/assets/premium_bible_product_1772525818617.png"
+                alt="Sanctuary Store"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <h3 className="text-2xl font-serif mb-4">Sanctuary Store</h3>
+            <p className="opacity-80">Premium religious goods, Bibles, and sacramentals to aid your prayer life.</p>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* Spiritual Helper Trigger (Mock) */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button className="glass holy-glow p-4 rounded-full flex items-center gap-3 text-crimson-deep font-medium shadow-2xl">
+          <span className="w-10 h-10 bg-gold-soft rounded-full flex items-center justify-center text-parchment animate-pulse">🙏</span>
+          Spiritual Helper
+        </button>
+      </div>
     </div>
   );
 }
