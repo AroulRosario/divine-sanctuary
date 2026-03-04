@@ -1,6 +1,3 @@
-import kjvDataRaw from '../kjv.json';
-
-
 export interface KjvVerse {
     book_name: string;
     book: number;
@@ -87,18 +84,35 @@ export const BIBLE_BOOKS = [
     { id: 'book-66', order: 66, name: 'Revelation', abbreviation: 'Rev' }
 ];
 
+// Cache for the loaded Bible data
 let cachedKjvData: KjvJsonData | null = null;
 
-export function fetchKjvData(): KjvJsonData | null {
+// Fetch kjv.json from the public folder via HTTP — this works reliably in Vercel
+// because the public folder is always served as static assets.
+export async function getKjvData(): Promise<KjvJsonData | null> {
     if (cachedKjvData) {
         return cachedKjvData;
     }
 
     try {
-        cachedKjvData = kjvDataRaw as unknown as KjvJsonData;
+        // Use NEXT_PUBLIC_VERCEL_URL or fallback — this works for both local and Vercel
+        const baseUrl = process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'http://localhost:3000';
+
+        const response = await fetch(`${baseUrl}/kjv.json`, {
+            // Cache aggressively — this is static Bible data
+            next: { revalidate: 86400 }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch kjv.json: ${response.status}`);
+        }
+
+        cachedKjvData = await response.json();
         return cachedKjvData;
     } catch (error) {
-        console.error("Failed to read local kjv.json:", error);
+        console.error('Failed to load KJV data:', error);
         return null;
     }
 }

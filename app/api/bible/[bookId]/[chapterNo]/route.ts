@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, fetchKjvData } from "@/lib/bibleData";
+import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, getKjvData } from "@/lib/bibleData";
 
 export async function GET(
     request: Request,
@@ -14,20 +14,18 @@ export async function GET(
         }
 
         const chapterNum = parseInt(chapterNo);
-        const kjvData = fetchKjvData();
+        const kjvData = await getKjvData();
 
         if (!kjvData) {
-            return NextResponse.json({ error: "Bible dataset not found" }, { status: 500 });
+            return NextResponse.json({ error: "Bible dataset unavailable" }, { status: 500 });
         }
 
-        // The KJV JSON is perfectly structured as a flat array of verses.
-        // We just filter by book order and chapter number.
         const chapterVerses = kjvData.verses.filter(
             v => v.book === bookDef.order && v.chapter === chapterNum
         );
 
         if (chapterVerses.length === 0) {
-            return NextResponse.json({ error: "Chapter not fully found" }, { status: 404 });
+            return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
         }
 
         const formattedChapter = {
@@ -38,7 +36,7 @@ export async function GET(
                 number: v.verse,
                 translations: [
                     {
-                        language: SUPPORTED_LANGUAGES[0], // English KJV
+                        language: SUPPORTED_LANGUAGES[0],
                         text: v.text
                     }
                 ]
@@ -47,7 +45,7 @@ export async function GET(
 
         return NextResponse.json(formattedChapter);
     } catch (error) {
-        console.error("Failed to parse local KJV chapter:", error);
+        console.error("Failed to load KJV chapter:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
