@@ -1,25 +1,21 @@
-export interface BibleVerse {
-    Verseid: string;
-    Verse: string;
+import fs from 'fs';
+import path from 'path';
+
+export interface KjvVerse {
+    book_name: string;
+    book: number;
+    chapter: number;
+    verse: number;
+    text: string;
 }
 
-export interface BibleChapter {
-    Verse: BibleVerse[];
-}
-
-export interface BibleBook {
-    Chapter: BibleChapter[];
-}
-
-export interface BibleJsonRoot {
-    Book: BibleBook[];
+export interface KjvJsonData {
+    metadata: any;
+    verses: KjvVerse[];
 }
 
 export const SUPPORTED_LANGUAGES = [
-    { code: 'en', name: 'English', githubId: 'English' },
-    { code: 'hi', name: 'Hindi', githubId: 'Hindi' },
-    { code: 'ta', name: 'Tamil', githubId: 'Tamil' },
-    { code: 'te', name: 'Telugu', githubId: 'Telugu' },
+    { code: 'en', name: 'English (KJV)', githubId: 'English' },
 ];
 
 export const BIBLE_BOOKS = [
@@ -91,18 +87,20 @@ export const BIBLE_BOOKS = [
     { id: 'book-66', order: 66, name: 'Revelation', abbreviation: 'Rev' }
 ];
 
-export async function fetchBibleJson(githubLanguageId: string): Promise<BibleJsonRoot | null> {
-    const url = `https://raw.githubusercontent.com/godlytalias/Bible-Database/master/${githubLanguageId}/bible.json`;
-    try {
-        const res = await fetch(url, { next: { revalidate: 86400 } }); // Cache for 24h
-        if (!res.ok) throw new Error(`Failed to fetch ${githubLanguageId} Bible`);
-        const text = await res.text();
+let cachedKjvData: KjvJsonData | null = null;
 
-        // The JSON files might have a BOM or slight formatting issues.
-        const cleanText = text.replace(/^\\uFEFF/, "").trim();
-        return JSON.parse(cleanText) as BibleJsonRoot;
-    } catch (e) {
-        console.error(`fetchBibleJson error for ${githubLanguageId}:`, e);
+export function fetchKjvData(): KjvJsonData | null {
+    if (cachedKjvData) {
+        return cachedKjvData;
+    }
+
+    try {
+        const filePath = path.join(process.cwd(), 'kjv.json');
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        cachedKjvData = JSON.parse(fileContent) as KjvJsonData;
+        return cachedKjvData;
+    } catch (error) {
+        console.error("Failed to read local kjv.json:", error);
         return null;
     }
 }

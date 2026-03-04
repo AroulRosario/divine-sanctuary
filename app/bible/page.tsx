@@ -36,8 +36,6 @@ export default function BiblePage() {
     const [languages, setLanguages] = useState<Language[]>([]);
     const [selectedBook, setSelectedBook] = useState<string>("");
     const [selectedChapter, setSelectedChapter] = useState<number>(1);
-    const [leftLang, setLeftLang] = useState<string>("en");
-    const [rightLang, setRightLang] = useState<string>("hi");
     const [chapterData, setChapterData] = useState<Chapter | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -111,28 +109,10 @@ export default function BiblePage() {
                         onChange={(e) => setSelectedChapter(parseInt(e.target.value))}
                         className="bg-transparent border border-gold-soft/30 rounded-full px-4 py-2 outline-none focus:border-gold-soft transition-all w-20"
                     >
-                        {[...Array(20)].map((_, i) => (
+                        {[...Array(50)].map((_, i) => (
                             <option key={i + 1} value={i + 1}>{i + 1}</option>
                         ))}
                     </select>
-
-                    <div className="flex items-center gap-2 border-l border-gold-soft/20 pl-4">
-                        <select
-                            value={leftLang}
-                            onChange={(e) => setLeftLang(e.target.value)}
-                            className="bg-transparent border border-gold-soft/10 rounded-lg px-2 py-1 text-sm"
-                        >
-                            {languages.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
-                        </select>
-                        <span className="text-gold-soft">/</span>
-                        <select
-                            value={rightLang}
-                            onChange={(e) => setRightLang(e.target.value)}
-                            className="bg-transparent border border-gold-soft/10 rounded-lg px-2 py-1 text-sm"
-                        >
-                            {languages.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
-                        </select>
-                    </div>
                 </div>
             </header>
 
@@ -156,22 +136,13 @@ export default function BiblePage() {
                             <p className="text-xl text-gold-soft font-serif">Chapter {selectedChapter}</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-1 px-4 md:px-0 bg-gold-soft/10 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="grid grid-cols-1 gap-1 px-4 md:px-0 bg-gold-soft/10 rounded-3xl overflow-hidden shadow-2xl">
                             {chapterData?.verses && Array.isArray(chapterData.verses) && chapterData.verses.map((verse) => (
                                 <div key={`verse-${verse.number}`} className="contents group">
-                                    {/* Left Column (Language 1) */}
                                     <div className="bg-parchment/80 p-6 md:p-8 transition-all hover:bg-white holy-glow relative">
                                         <span className="absolute top-4 left-4 text-xs font-bold text-gold-soft opacity-50">{verse.number}</span>
-                                        <p className={`text-lg md:text-xl leading-relaxed text-slate-800 ${languages.find(l => l.code === leftLang)?.code !== 'en' ? 'font-indic' : ''}`}>
-                                            {getTranslation(verse, leftLang)}
-                                        </p>
-                                    </div>
-
-                                    {/* Right Column (Language 2 or Parallel) */}
-                                    <div className="bg-parchment/80 p-6 md:p-8 border-t md:border-t-0 md:border-l border-gold-soft/10 transition-all hover:bg-white holy-glow relative">
-                                        <span className="absolute top-4 left-4 text-xs font-bold text-gold-soft opacity-50 hidden md:block">{verse.number}</span>
-                                        <p className={`text-lg md:text-xl leading-relaxed text-slate-800 ${languages.find(l => l.code === rightLang)?.code !== 'en' ? 'font-indic' : ''}`}>
-                                            {getTranslation(verse, rightLang)}
+                                        <p className="text-lg md:text-xl leading-relaxed text-slate-800">
+                                            {getTranslation(verse, 'en')}
                                         </p>
                                     </div>
                                 </div>

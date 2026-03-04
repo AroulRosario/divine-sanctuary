@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, fetchBibleJson } from "@/lib/bibleData";
+import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, fetchKjvData } from "@/lib/bibleData";
 
 export async function GET(
     request: Request,
@@ -8,70 +8,46 @@ export async function GET(
     try {
         const { bookId, chapterNo } = await params;
 
-        // Find the book definition to get its order (which matches JSON index 0-based)
         const bookDef = BIBLE_BOOKS.find(b => b.id === bookId);
         if (!bookDef) {
             return NextResponse.json({ error: "Book not found" }, { status: 404 });
         }
 
-        const bookIndex = bookDef.order - 1;
-        const chapIndex = parseInt(chapterNo) - 1;
+        const chapterNum = parseInt(chapterNo);
+        const kjvData = fetchKjvData();
 
-        // Fetch Bible data concurrently for all supported languages
-        const fetchPromises = SUPPORTED_LANGUAGES.map(lang =>
-            fetchBibleJson(lang.githubId).then(data => ({ code: lang.code, data }))
-        );
-
-        const languageResults = await Promise.all(fetchPromises);
-
-        // We will construct a generic response matching the frontend expectations
-        const versesMap = new Map<string, any>();
-
-        for (const { code, data } of languageResults) {
-            if (!data || !data.Book || !data.Book[bookIndex]) continue;
-
-            const bookData = data.Book[bookIndex];
-            if (!bookData.Chapter || !bookData.Chapter[chapIndex]) continue;
-
-            const chapterData = bookData.Chapter[chapIndex];
-
-            for (const verse of chapterData.Verse) {
-                // Determine actual verse number by dropping the chapter prefix in the Verseid.
-                // Godlytalias uses 8-digit IDs, e.g., for John 1:1 -> 42000000. 
-                // A safer fallback is sequential index + 1.
-                const verseIndexFromData = chapterData.Verse.indexOf(verse) + 1;
-                const verseNumStr = String(verseIndexFromData);
-
-                if (!versesMap.has(verseNumStr)) {
-                    versesMap.set(verseNumStr, {
-                        number: verseIndexFromData,
-                        translations: []
-                    });
-                }
-
-                versesMap.get(verseNumStr).translations.push({
-                    language: SUPPORTED_LANGUAGES.find(l => l.code === code),
-                    text: verse.Verse
-                });
-            }
+        if (!kjvData) {
+            return NextResponse.json({ error: "Bible dataset not found" }, { status: 500 });
         }
 
-        const versesArray = Array.from(versesMap.values()).sort((a: any, b: any) => a.number - b.number);
+        // The KJV JSON is perfectly structured as a flat array of verses.
+        // We just filter by book order and chapter number.
+        const chapterVerses = kjvData.verses.filter(
+            v => v.book === bookDef.order && v.chapter === chapterNum
+        );
 
-        if (versesArray.length === 0) {
+        if (chapterVerses.length === 0) {
             return NextResponse.json({ error: "Chapter not fully found" }, { status: 404 });
         }
 
         const formattedChapter = {
             id: `${bookId}-ch-${chapterNo}`,
-            number: parseInt(chapterNo),
+            number: chapterNum,
             bookId: bookId,
-            verses: versesArray
+            verses: chapterVerses.map(v => ({
+                number: v.verse,
+                translations: [
+                    {
+                        language: SUPPORTED_LANGUAGES[0], // English KJV
+                        text: v.text
+                    }
+                ]
+            }))
         };
 
         return NextResponse.json(formattedChapter);
     } catch (error) {
-        console.error("Failed to fetch static Bible chapter:", error);
+        console.error("Failed to parse local KJV chapter:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

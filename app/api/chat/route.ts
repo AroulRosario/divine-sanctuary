@@ -1,29 +1,26 @@
 import { NextResponse } from "next/server";
-import { fetchBibleJson } from "@/lib/bibleData";
+import { fetchKjvData, BIBLE_BOOKS } from "@/lib/bibleData";
 
 export async function POST(request: Request) {
     try {
         const { message } = await request.json();
 
-        // Fetch English Bible for random compassionate verse
+        // Default compassion verse
         let verseText = "God is our refuge and strength, a very present help in trouble.";
         let reference = "Psalms 46:1";
 
         try {
-            const englishData = await fetchBibleJson('English');
-            if (englishData && englishData.Book && englishData.Book.length > 18) {
-                // Book 19=Psalms (index 18)
-                const psalms = englishData.Book[18];
-                if (psalms && psalms.Chapter) {
-                    const randomChapterNum = Math.floor(Math.random() * psalms.Chapter.length);
-                    const chapter = psalms.Chapter[randomChapterNum];
-                    if (chapter && chapter.Verse && chapter.Verse.length > 0) {
-                        const randomVerseNum = Math.floor(Math.random() * chapter.Verse.length);
-                        const verse = chapter.Verse[randomVerseNum];
+            const kjvData = fetchKjvData();
+            if (kjvData && kjvData.verses && kjvData.verses.length > 0) {
+                // Psalms is book 19 
+                const psalmsVerses = kjvData.verses.filter(v => v.book === 19);
 
-                        verseText = verse.Verse;
-                        reference = `Psalms ${randomChapterNum + 1}:${parseInt(verse.Verseid) || (randomVerseNum + 1)}`;
-                    }
+                if (psalmsVerses.length > 0) {
+                    const randomIdx = Math.floor(Math.random() * psalmsVerses.length);
+                    const verse = psalmsVerses[randomIdx];
+
+                    verseText = verse.text;
+                    reference = `Psalms ${verse.chapter}:${verse.verse}`;
                 }
             }
         } catch (e) {
