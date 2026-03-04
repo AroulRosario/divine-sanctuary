@@ -48,6 +48,7 @@ export const metadata: Metadata = {
   description: "A holy and amazing platform for the faithful.",
 };
 
+import Navbar from "@/components/Navbar";
 import SpiritualHelper from "@/components/SpiritualHelper";
 
 export default function RootLayout({
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoMalayalam.variable} ${notoTelugu.variable} ${notoBengali.variable} ${notoKannada.variable} antialiased`}
       >
+        <Navbar />
         {children}
         <SpiritualHelper />
       </body>
