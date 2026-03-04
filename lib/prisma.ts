@@ -4,7 +4,12 @@ import pg from 'pg'
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const connectionString = `${process.env.DATABASE_URL}`
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString || connectionString === "undefined") {
+    console.error("CRITICAL ERROR: DATABASE_URL is not defined. Please set it in your environment variables.");
+}
+
 const pool = new pg.Pool({ connectionString })
 const adapter = new PrismaPg(pool)
 

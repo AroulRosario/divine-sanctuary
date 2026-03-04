@@ -43,11 +43,21 @@ export default function BiblePage() {
 
     useEffect(() => {
         fetch("/api/bible/metadata")
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) throw new Error("Divine Connection Lost");
+                return res.json();
+            })
             .then((data) => {
-                setBooks(data.books);
-                setLanguages(data.languages);
-                if (data.books.length > 0) setSelectedBook(data.books.find((b: any) => b.name === "John")?.id || data.books[0].id);
+                const booksData = data.books || [];
+                const langsData = data.languages || [];
+                setBooks(booksData);
+                setLanguages(langsData);
+                if (booksData.length > 0) {
+                    setSelectedBook(booksData.find((b: any) => b.name === "John")?.id || booksData[0].id);
+                }
+            })
+            .catch(err => {
+                console.error("Connection Error:", err);
             });
     }, []);
 
@@ -55,9 +65,18 @@ export default function BiblePage() {
         if (selectedBook) {
             setLoading(true);
             fetch(`/api/bible/${selectedBook}/${selectedChapter}`)
-                .then((res) => res.json())
+                .then((res) => {
+                    if (!res.ok) throw new Error("Chapter Loading Failed");
+                    return res.json();
+                })
                 .then((data) => {
                     setChapterData(data);
+                })
+                .catch(err => {
+                    console.error("Chapter Error:", err);
+                    setChapterData(null);
+                })
+                .finally(() => {
                     setLoading(false);
                 });
         }

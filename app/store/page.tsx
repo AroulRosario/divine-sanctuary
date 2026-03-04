@@ -20,9 +20,17 @@ export default function StorePage() {
 
     useEffect(() => {
         fetch("/api/products")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Store Boutique unreachable");
+                return res.json();
+            })
             .then(data => {
-                setProducts(data);
+                setProducts(Array.isArray(data) ? data : []);
+            })
+            .catch(err => {
+                console.error("Store Error:", err);
+            })
+            .finally(() => {
                 setLoading(false);
             });
     }, []);

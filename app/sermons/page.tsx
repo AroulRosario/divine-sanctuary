@@ -18,9 +18,17 @@ export default function SermonsPage() {
 
     useEffect(() => {
         fetch("/api/sermons")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Sermons currently unavailable");
+                return res.json();
+            })
             .then(data => {
-                setSermons(data);
+                setSermons(Array.isArray(data) ? data : []);
+            })
+            .catch(err => {
+                console.error("Sermon Error:", err);
+            })
+            .finally(() => {
                 setLoading(false);
             });
     }, []);

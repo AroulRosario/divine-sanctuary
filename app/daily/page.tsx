@@ -10,9 +10,18 @@ export default function DailyBreadPage() {
 
     useEffect(() => {
         fetch("/api/daily")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Daily Bread not found");
+                return res.json();
+            })
             .then(data => {
-                setGospel(data);
+                if (data && data.verse) {
+                    setGospel(data);
+                }
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Daily Error:", err);
                 setLoading(false);
             });
     }, []);
