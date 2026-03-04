@@ -48,6 +48,8 @@ export const metadata: Metadata = {
   description: "A holy and amazing platform for the faithful.",
 };
 
+import SpiritualHelper from "@/components/SpiritualHelper";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -59,6 +61,7 @@ export default function RootLayout({
         className={`${inter.variable} ${notoDevanagari.variable} ${notoTamil.variable} ${notoMalayalam.variable} ${notoTelugu.variable} ${notoBengali.variable} ${notoKannada.variable} antialiased`}
       >
         {children}
+        <SpiritualHelper />
       </body>
     </html>
   );

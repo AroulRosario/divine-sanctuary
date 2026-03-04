@@ -23,10 +23,10 @@ export default function Home() {
             "Thy word is a lamp unto my feet, and a light unto my path."
           </p>
           <div className="flex gap-6">
-            <Link href="/" className="glass px-8 py-4 text-lg font-medium text-crimson-deep transition-all holy-glow rounded-full">
+            <Link href="/bible" className="glass px-8 py-4 text-lg font-medium text-crimson-deep transition-all holy-glow rounded-full">
               Explore Scripture
             </Link>
-            <Link href="/" className="bg-crimson-deep text-parchment px-8 py-4 text-lg font-medium transition-all hover:bg-opacity-90 rounded-full shadow-lg">
+            <Link href="/store" className="bg-crimson-deep text-parchment px-8 py-4 text-lg font-medium transition-all hover:bg-opacity-90 rounded-full shadow-lg">
               Sanctuary Store
             </Link>
           </div>
