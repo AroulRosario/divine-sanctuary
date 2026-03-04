@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, getKjvData } from "@/lib/bibleData";
+import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, fetchChapterFromApi } from "@/lib/bibleData";
 
 export async function GET(
     request: Request,
@@ -14,17 +14,9 @@ export async function GET(
         }
 
         const chapterNum = parseInt(chapterNo);
-        const kjvData = await getKjvData();
+        const data = await fetchChapterFromApi(bookDef.apiName, chapterNum);
 
-        if (!kjvData) {
-            return NextResponse.json({ error: "Bible dataset unavailable" }, { status: 500 });
-        }
-
-        const chapterVerses = kjvData.verses.filter(
-            v => v.book === bookDef.order && v.chapter === chapterNum
-        );
-
-        if (chapterVerses.length === 0) {
+        if (!data || !data.verses || data.verses.length === 0) {
             return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
         }
 
@@ -32,12 +24,13 @@ export async function GET(
             id: `${bookId}-ch-${chapterNo}`,
             number: chapterNum,
             bookId: bookId,
-            verses: chapterVerses.map(v => ({
+            bookName: bookDef.name,
+            verses: data.verses.map(v => ({
                 number: v.verse,
                 translations: [
                     {
                         language: SUPPORTED_LANGUAGES[0],
-                        text: v.text
+                        text: v.text.trim()
                     }
                 ]
             }))
@@ -45,7 +38,7 @@ export async function GET(
 
         return NextResponse.json(formattedChapter);
     } catch (error) {
-        console.error("Failed to load KJV chapter:", error);
+        console.error("Failed to load chapter:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

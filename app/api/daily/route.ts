@@ -1,38 +1,43 @@
 import { NextResponse } from "next/server";
-import { BIBLE_BOOKS, SUPPORTED_LANGUAGES, getKjvData } from "@/lib/bibleData";
+import { SUPPORTED_LANGUAGES, fetchChapterFromApi } from "@/lib/bibleData";
 
 export async function GET() {
     try {
-        const kjvData = await getKjvData();
+        // Use Psalms 23 as the daily inspiration source
+        const today = new Date();
+        // Rotate between beautiful Psalms chapters based on day of year
+        const psalmsChapters = [23, 91, 46, 1, 27, 139, 103, 121, 34, 37, 51, 100, 119, 145, 150];
+        const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
+        const chapterIdx = dayOfYear % psalmsChapters.length;
+        const chapter = psalmsChapters[chapterIdx];
 
-        if (!kjvData || !kjvData.verses || kjvData.verses.length === 0) {
-            return NextResponse.json({ error: "Bible dataset unavailable" }, { status: 500 });
+        const data = await fetchChapterFromApi('psalms', chapter);
+
+        if (!data || !data.verses || data.verses.length === 0) {
+            return NextResponse.json({ error: "Could not load daily verse" }, { status: 500 });
         }
 
-        const today = new Date();
-        const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-        const verseIndex = dateSeed % kjvData.verses.length;
-        const selectedVerseData = kjvData.verses[verseIndex];
-
-        const bookDef = BIBLE_BOOKS.find(b => b.order === selectedVerseData.book);
+        // Pick a verse based on the current date for daily consistency
+        const verseIdx = today.getDate() % data.verses.length;
+        const selectedVerse = data.verses[verseIdx];
 
         const dailyGospel = {
-            id: `daily-${dateSeed}`,
+            id: `daily-${today.toISOString().split('T')[0]}`,
             date: today.toISOString(),
-            meaning: "Today's Word for spiritual nourishment, meditation, and peace.",
+            meaning: "Today's Word from the Psalms — for your peace, strength, and spiritual nourishment.",
             verse: {
-                id: `v-${dateSeed}`,
-                number: selectedVerseData.verse,
+                id: `v-psalm-${chapter}-${selectedVerse.verse}`,
+                number: selectedVerse.verse,
                 translations: [
                     {
                         language: SUPPORTED_LANGUAGES[0],
-                        text: selectedVerseData.text
+                        text: selectedVerse.text.trim()
                     }
                 ],
                 chapter: {
-                    number: selectedVerseData.chapter,
+                    number: chapter,
                     book: {
-                        name: bookDef?.name || selectedVerseData.book_name
+                        name: "Psalms"
                     }
                 }
             }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getKjvData } from "@/lib/bibleData";
+import { fetchRandomVerse } from "@/lib/bibleData";
 
 export async function POST(request: Request) {
     try {
@@ -9,21 +9,16 @@ export async function POST(request: Request) {
         let reference = "Psalms 46:1";
 
         try {
-            const kjvData = await getKjvData();
-            if (kjvData && kjvData.verses && kjvData.verses.length > 0) {
-                const psalmsVerses = kjvData.verses.filter(v => v.book === 19);
-                if (psalmsVerses.length > 0) {
-                    const randomIdx = Math.floor(Math.random() * psalmsVerses.length);
-                    const verse = psalmsVerses[randomIdx];
-                    verseText = verse.text;
-                    reference = `Psalms ${verse.chapter}:${verse.verse}`;
-                }
+            const verse = await fetchRandomVerse('psalms');
+            if (verse) {
+                verseText = verse.text.trim();
+                reference = `Psalms ${verse.chapter}:${verse.verse}`;
             }
         } catch (e) {
             console.error("Chat verse fetch error:", e);
         }
 
-        const response = `Bless you. I hear your heart in saying "${message.substring(0, 30)}...". Remember the Word: "${verseText}" (${reference}). How else can I pray for you today?`;
+        const response = `Bless you, dear soul. I hear your heart. Remember the Word: "${verseText}" (${reference}). May this scripture bring you peace and strength. How else can I support you today?`;
 
         return NextResponse.json({ response });
     } catch (error) {
