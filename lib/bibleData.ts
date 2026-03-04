@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import kjvDataRaw from '../kjv.json';
+
 
 export interface KjvVerse {
     book_name: string;
@@ -95,9 +95,7 @@ export function fetchKjvData(): KjvJsonData | null {
     }
 
     try {
-        const filePath = path.join(process.cwd(), 'kjv.json');
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        cachedKjvData = JSON.parse(fileContent) as KjvJsonData;
+        cachedKjvData = kjvDataRaw as unknown as KjvJsonData;
         return cachedKjvData;
     } catch (error) {
         console.error("Failed to read local kjv.json:", error);
