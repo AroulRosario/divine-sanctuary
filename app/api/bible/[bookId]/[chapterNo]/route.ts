@@ -36,13 +36,15 @@ export async function GET(
             const chapterData = bookData.Chapter[chapIndex];
 
             for (const verse of chapterData.Verse) {
-                // Determine actual verse number from "Verseid" like "00000000" or simple string "1"
-                // Usually it's index + 1, let's just use the index for simplicity
-                const verseNumStr = String(parseInt(verse.Verseid.replace(/^0+/, '')) || (chapterData.Verse.indexOf(verse) + 1));
+                // Determine actual verse number by dropping the chapter prefix in the Verseid.
+                // Godlytalias uses 8-digit IDs, e.g., for John 1:1 -> 42000000. 
+                // A safer fallback is sequential index + 1.
+                const verseIndexFromData = chapterData.Verse.indexOf(verse) + 1;
+                const verseNumStr = String(verseIndexFromData);
 
                 if (!versesMap.has(verseNumStr)) {
                     versesMap.set(verseNumStr, {
-                        number: parseInt(verseNumStr),
+                        number: verseIndexFromData,
                         translations: []
                     });
                 }
@@ -54,7 +56,7 @@ export async function GET(
             }
         }
 
-        const versesArray = Array.from(versesMap.values()).sort((a, b) => a.number - b.number);
+        const versesArray = Array.from(versesMap.values()).sort((a: any, b: any) => a.number - b.number);
 
         if (versesArray.length === 0) {
             return NextResponse.json({ error: "Chapter not fully found" }, { status: 404 });

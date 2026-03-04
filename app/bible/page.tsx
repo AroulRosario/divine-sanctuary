@@ -70,11 +70,12 @@ export default function BiblePage() {
                     return res.json();
                 })
                 .then((data) => {
+                    if (data.error) throw new Error(data.error);
                     setChapterData(data);
                 })
                 .catch(err => {
                     console.error("Chapter Error:", err);
-                    setChapterData(null);
+                    setChapterData({ number: selectedChapter, verses: [] });
                 })
                 .finally(() => {
                     setLoading(false);
@@ -156,8 +157,8 @@ export default function BiblePage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-1 px-4 md:px-0 bg-gold-soft/10 rounded-3xl overflow-hidden shadow-2xl">
-                            {chapterData?.verses.map((verse) => (
-                                <div key={verse.number} className="contents group">
+                            {chapterData?.verses && Array.isArray(chapterData.verses) && chapterData.verses.map((verse) => (
+                                <div key={`verse-${verse.number}`} className="contents group">
                                     {/* Left Column (Language 1) */}
                                     <div className="bg-parchment/80 p-6 md:p-8 transition-all hover:bg-white holy-glow relative">
                                         <span className="absolute top-4 left-4 text-xs font-bold text-gold-soft opacity-50">{verse.number}</span>
@@ -177,10 +178,10 @@ export default function BiblePage() {
                             ))}
                         </div>
 
-                        {chapterData?.verses.length === 0 && (
+                        {(!chapterData?.verses || !Array.isArray(chapterData.verses) || chapterData.verses.length === 0) && (
                             <div className="text-center py-20 glass rounded-3xl">
-                                <p className="text-2xl font-serif italic text-crimson-deep/60">"Thy Word is infinite, though this chapter yet awaits seeding."</p>
-                                <p className="mt-4 text-gold-soft">Currently seeding more books in the background.</p>
+                                <p className="text-2xl font-serif italic text-crimson-deep/60">"Thy Word is infinite, though this chapter yet awaits."</p>
+                                <p className="mt-4 text-gold-soft">The API could not fetch this chapter. Please try another book or chapter.</p>
                             </div>
                         )}
                     </div>
